@@ -2,7 +2,13 @@
 
 A public status page for [EveSynapse](https://evesynapse.app). It is hosted on Cloudflare Pages, apart from the EveSynapse servers, so it still loads when they are down.
 
-Once a minute the page asks each server listed in `config.js` (the EveSynapse app and the EveSynapse API) for its `/status.json`, and shows each service with its state: working, degraded or down. A server that does not answer is reported as unreachable, and its services are shown as unknown, never as working. The page keeps the last 60 checks in the visitor's browser as a strip of colored ticks.
+Once a minute the page checks, straight from the visitor's browser, each source listed in `config.js`:
+
+- **EveSynapse**: the app's `/status.json`, a state for each of its services.
+- **Market API**: the market API's health at `/api/market/v1/health` on its own host, so an unreachable API host shows apart from the main site.
+- **EVE Online API (ESI)**: ESI's own Tranquility status, read directly from `esi.evetech.net`, so it still shows when EveSynapse is down.
+
+Each service shows its state: working, degraded or down. A source that does not answer, answers with an error, is blocked by CORS or takes longer than 10 seconds is reported as unreachable, and its services are shown as unknown, never as working. The page keeps the last 60 checks in the visitor's browser as a strip of colored ticks.
 
 Plain HTML, CSS and JavaScript. There is no build step, no Node and no bundler.
 
@@ -37,7 +43,15 @@ Plain HTML, CSS and JavaScript. There is no build step, no Node and no bundler.
 - `checked_at`: when the summary was built. An answer more than 5 minutes old counts as no answer.
 - Each service has an `id`, a `state` (`ok`, `degraded` or `down`) and an `age`: seconds since it last showed it was working, or `null` when that is not known. Nothing else is reported.
 
-The app reports the database, the background worker, notifications, the EVE API (ESI), the market sweeps and, when it has push set up, browser push. Any other service id is shown as written; add a label for it in `LABELS` in `status.js`.
+The app reports the database, the background worker, notifications, the EVE API (ESI) as the app sees it, the market sweeps and, when it has push set up, browser push. Any other service id is shown as written; add a label for it in `LABELS` in `status.js`.
+
+The market API answers `GET /api/market/v1/health` with one service, under the same rules:
+
+```json
+{ "service": "market_api", "state": "ok", "checked_at": "2026-10-28T18:00:00Z" }
+```
+
+ESI's `GET /latest/status/` is EVE Online's own: the page shows Tranquility as working with its player count, or degraded while it is in VIP mode.
 
 ## Deploying on Cloudflare Pages
 
@@ -51,7 +65,7 @@ The app reports the database, the background worker, notifications, the EVE API 
 
 ### Choosing the servers
 
-`config.js` lists the servers, each with a name and its public address (scheme and host only). When you add, remove or change one, change two places in the same commit:
+`config.js` lists the sources, each with a name, its public address (scheme and host only) and a kind (`summary`, the default, for an EveSynapse `/status.json`; `single` for one service's health at `path`; `esi` for ESI). When you add, remove or change an address, change two places in the same commit:
 
 - the `sources` list in `config.js`;
 - `connect-src` in the Content-Security-Policy meta tag in `index.html`. The browser blocks a check to any address not listed there.
@@ -64,7 +78,15 @@ A server only lets one other site's pages read its `/status.json`. On the EveSyn
 STATUS_PAGE_ORIGIN=https://status.evesynapse.app
 ```
 
-Use the Pages address (`https://<project>.pages.dev`) if there is no custom domain. The API service needs the same origin allowed. Without it the page reports that server as unreachable even while it is up.
+Use the Pages address (`https://<project>.pages.dev`) if there is no custom domain. The market API reads the same `STATUS_PAGE_ORIGIN`, so one value covers both. Without it the page reports those sources as unreachable even while they are up. ESI allows any origin and needs nothing.
+
+### The market API host
+
+The market API is served by the same app on its own host name:
+
+- Set `MARKET_API_HOST` on the app to that host name, for example `MARKET_API_HOST=api.evesynapse.app`. On that host only `/api/` paths answer.
+- Give the host its own DNS record, or its own Cloudflare tunnel route, pointing at the same app.
+- Keep the Market API `url` in `config.js` and `connect-src` in `index.html` on that same host.
 
 ## Trying it locally
 

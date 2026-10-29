@@ -19,7 +19,8 @@
     notifications: "Notifications",
     esi: "EVE API (ESI)",
     market: "Market data",
-    push: "Browser push"
+    push: "Browser push",
+    market_api: "Market API"
   };
   var ORDER = ["database", "worker", "esi", "market", "notifications", "push"];
   var STATE_WORDS = {
@@ -29,14 +30,26 @@
     unknown: "Unknown"
   };
   var RANK = { ok: 0, degraded: 1, down: 2, unreachable: 3 };
+  // What each kind of source answers, and where by default:
+  // summary, an EveSynapse /status.json with a list of services;
+  // single, one service's {service, state, checked_at} (the market
+  // API's health); esi, ESI's own Tranquility status, read directly.
+  var PATHS = {
+    summary: "/status.json",
+    single: "/api/market/v1/health",
+    esi: "/latest/status/?datasource=tranquility"
+  };
 
   var cfg = window.STATUS_CONFIG || {};
   var sources = (Array.isArray(cfg.sources) ? cfg.sources : []).filter(function (s) {
     return s && typeof s.url === "string" && s.url;
   }).map(function (s) {
+    var kind = PATHS[s.kind] ? s.kind : "summary";
     return {
       name: String(s.name || s.url),
-      url: s.url.replace(/\/+$/, ""),
+      kind: kind,
+      base: s.url.replace(/\/+$/, ""),
+      url: s.url.replace(/\/+$/, "") + (typeof s.path === "string" && s.path ? s.path : PATHS[kind]),
       bad: [],
       lastIds: null, // service ids of the last answer, for unknown rows
       list: null
@@ -120,22 +133,52 @@
       });
       return "unreachable";
     }
-    var data = result.data;
-    var lag = Math.max(0, (now - Date.parse(data.checked_at)) / 1000);
+    var norm = result.data;
     ul.appendChild(row("Server", "ok", "Answering"));
-    var services = sortServices(data.services);
-    src.lastIds = services.map(function (s) { return s.id; });
+    src.lastIds = norm.rows.map(function (r) { return r.id; });
     src.bad = [];
-    services.forEach(function (s) {
+    norm.rows.forEach(function (r) {
+      ul.appendChild(row(label(r.id), r.state, r.note));
+      if (r.state !== "ok") src.bad.push(label(r.id));
+    });
+    return norm.state;
+  }
+
+  // normalize turns a source's answer into {state, rows}, one row
+  // per service, or {why} when the answer cannot be used.
+  function normalize(src, data, now) {
+    if (!data || typeof data !== "object") return { why: "Answered with something unreadable" };
+    if (src.kind === "esi") {
+      if (typeof data.players !== "number") return { why: "Answered with something unreadable" };
+      var vip = data.vip === true;
+      return { data: { state: vip ? "degraded" : "ok", rows: [{
+        id: "Tranquility",
+        state: vip ? "degraded" : "ok",
+        note: vip ? "VIP mode, developers only" : data.players.toLocaleString() + " players online"
+      }] } };
+    }
+    var checked = Date.parse(data.checked_at);
+    if (isNaN(checked)) return { why: "Answered with something unreadable" };
+    if (now - checked > STALE_MS) return { why: "Answered with an out of date status" };
+    var lag = Math.max(0, (now - checked) / 1000);
+    if (src.kind === "single") {
+      if (RANK[data.state] == null || data.state === "unreachable") return { why: "Answered with something unreadable" };
+      return { data: { state: data.state, rows: [{
+        id: String(data.service || "service"),
+        state: data.state,
+        note: "Checked " + ago(lag)
+      }] } };
+    }
+    if (!Array.isArray(data.services)) return { why: "Answered with something unreadable" };
+    var rows = sortServices(data.services).map(function (s) {
       var state = STATE_WORDS[s.state] ? s.state : "unknown";
       var note;
       if (typeof s.age !== "number") note = "No sign of work yet";
       else if (state === "ok") note = "Updated " + ago(s.age + lag);
       else note = "Last working " + ago(s.age + lag);
-      ul.appendChild(row(label(s.id), state, note));
-      if (state !== "ok") src.bad.push(label(s.id));
+      return { id: String(s.id), state: state, note: note };
     });
-    return RANK[data.state] != null ? data.state : "degraded";
+    return { data: { state: RANK[data.state] != null ? data.state : "degraded", rows: rows } };
   }
 
   function renderBanner(states) {
@@ -150,7 +193,7 @@
         "No server is answering. Service states are unknown until one does.");
     } else if (unreachable.length) {
       setBanner("down", unreachable.join(" and ") + (unreachable.length === 1 ? " is" : " are") + " unreachable",
-        "Its service states are unknown until it answers again." + (down.length + degraded.length ? " Also: " + down.concat(degraded).join(". ") + "." : ""));
+        (unreachable.length === 1 ? "Its service states are unknown until it answers again." : "Their service states are unknown until they answer again.") +(down.length + degraded.length ? " Also: " + down.concat(degraded).join(". ") + "." : ""));
     } else if (down.length) {
       setBanner("down", "Some services are down", down.concat(degraded).join(". ") + ". The site may be missing data until they recover.");
     } else if (degraded.length) {
@@ -201,7 +244,7 @@
   function fetchSource(src) {
     var ctrl = typeof AbortController === "function" ? new AbortController() : null;
     var kill = setTimeout(function () { if (ctrl) ctrl.abort(); }, TIMEOUT_MS);
-    return fetch(src.url + "/status.json", {
+    return fetch(src.url, {
       cache: "no-store",
       credentials: "omit",
       mode: "cors",
@@ -210,10 +253,7 @@
       if (res.status === 429) return { limited: true };
       if (!res.ok) return { why: "Answered with an error" };
       return res.json().then(function (data) {
-        var checked = Date.parse(data && data.checked_at);
-        if (!data || !Array.isArray(data.services) || isNaN(checked)) return { why: "Answered with something unreadable" };
-        if (Date.now() - checked > STALE_MS) return { why: "Answered with an out of date status" };
-        return { data: data };
+        return normalize(src, data, Date.now());
       });
     }).catch(function () {
       return { why: "Not answering" };
@@ -245,7 +285,7 @@
   }
 
   function start() {
-    if (sources.length) $("app-link").href = sources[0].url;
+    if (sources.length) $("app-link").href = sources[0].base;
     buildPanels();
     history = readHistory().filter(function (e) {
       return e && typeof e.t === "number" && RANK[e.s] != null;
