@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://evesynapse.app https://api.evesynapse.app; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark light">
+<title>EveSynapse Status</title>
+<meta name="description" content="Live health of EveSynapse's services.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="config.js" defer></script>
+<script src="status.js" defer></script>
+</head>
+<body>
+<main class="page">
+  <header class="top">
+    <a class="wordmark" id="app-link" href="https://evesynapse.app" aria-label="EveSynapse"><svg class="wordmark-glyph" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true" focusable="false"><defs><linearGradient id="es-up" class="es-up" x1="0.8" y1="0" x2="0.2" y2="1"><stop offset="0" stop-color="#ffe2a0"/><stop offset="1" stop-color="#ff7a26"/></linearGradient><linearGradient id="es-dn" class="es-dn" x1="0.8" y1="0" x2="0.2" y2="1"><stop offset="0" stop-color="#ff6a1a"/><stop offset="1" stop-color="#c8360f"/></linearGradient><radialGradient id="es-glow" class="es-glow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient></defs><path d="M44.8 1.85 L11.8 34.85 L27.8 34.85 Z" fill="url(#es-up)"/><path d="M44.8 1.85 L27.8 34.85 L21.8 34.85 Z" fill="#fff3d6" fill-opacity=".55"/><path d="M36.2 29.15 L52.2 29.15 L19.2 62.15 Z" fill="url(#es-dn)"/><path d="M36.2 29.15 L42.2 29.15 L19.2 62.15 Z" fill="#000" fill-opacity=".22"/><circle cx="32" cy="32" r="4.5" fill="url(#es-glow)"/><circle cx="32" cy="32" r="1.8" fill="#fff6e6"/></svg><span><svg class="wordmark-svg" viewBox="0 -920 7095 1200" aria-hidden="true" focusable="false"><path class="p-eve" d="M150 11V-75H61V-548H150V-636H446V-548H536V-424H417V-511H179V-374H358V-251H179V-113H417V-200H536V-75H446V11Z"/><path class="p-eve" d="M960 11V-75H872V-251H783V-636H901V-288H990V-113H1050V-288H1139V-636H1258V-251H1168V-75H1080V11Z"/><path class="p-eve" d="M1594 11V-75H1505V-548H1594V-636H1890V-548H1980V-424H1861V-511H1623V-374H1802V-251H1623V-113H1861V-200H1980V-75H1890V11Z"/><path class="p-syn p-s1" d="M2316 11V-75H2227V-200H2345V-113H2583V-251H2316V-337H2227V-548H2316V-636H2612V-548H2702V-424H2583V-511H2345V-374H2612V-288H2702V-75H2612V11Z"/><path class="p-syn p-s2" d="M3126 11V-337H3038V-424H2949V-636H3067V-461H3156V-374H3216V-461H3305V-636H3424V-424H3334V-337H3246V11Z"/><path class="p-syn p-s3" d="M3671 11V-636H3789V-548H3877V-461H3968V-200H4027V-636H4146V11H4027V-75H3939V-163H3848V-424H3789V11Z"/><path class="p-syn p-s4" d="M4393 11V-461H4482V-548H4570V-636H4690V-548H4778V-461H4868V11H4749V-163H4511V11ZM4511 -288H4749V-424H4660V-511H4600V-424H4511Z"/><path class="p-syn p-s5" d="M5115 11V-548H5204V-636H5500V-548H5590V-251H5500V-163H5233V11ZM5233 -288H5471V-511H5233Z"/><path class="p-syn p-s6" d="M5926 11V-75H5837V-200H5955V-113H6193V-251H5926V-337H5837V-548H5926V-636H6222V-548H6312V-424H6193V-511H5955V-374H6222V-288H6312V-75H6222V11Z"/><path class="p-syn p-s7" d="M6648 11V-75H6559V-548H6648V-636H6944V-548H7034V-424H6915V-511H6677V-374H6856V-251H6677V-113H6915V-200H7034V-75H6944V11Z"/></svg></span></a>
+    <span class="top-label">Status</span>
+  </header>
+
+  <section class="banner" id="banner" data-state="pending" aria-live="polite">
+    <span class="banner-dot" aria-hidden="true"></span>
+    <div>
+      <h1 id="banner-title">Checking EveSynapse</h1>
+      <p id="banner-detail">Asking the site how its services are doing.</p>
+    </div>
+  </section>
+
+  <div id="sources"></div>
+
+  <section class="panel">
+    <h2>Recent checks</h2>
+    <div class="history" id="history" role="img" aria-label="No checks recorded yet"></div>
+    <p class="history-note" id="history-note">Kept in this browser only.</p>
+  </section>
+
+  <footer class="foot">
+    <span id="last-check">Not checked yet.</span>
+    <span>Checks every minute.</span>
+  </footer>
+</main>
+<noscript><p class="noscript">This page needs JavaScript to check the site.</p></noscript>
+</body>
+</html>

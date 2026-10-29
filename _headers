@@ -1,0 +1,11 @@
+# Cloudflare Pages response headers. The page's Content-Security-Policy
+# is the meta tag in index.html; these cover what a meta tag cannot.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/config.js
+  Cache-Control: no-cache

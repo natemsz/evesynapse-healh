@@ -1,0 +1,26 @@
+Saira Semi Condensed (saira-sc-400.woff2, saira-sc-600.woff2) is the page body face.
+
+Copyright 2016 The Saira Project Authors (https://github.com/Omnibus-Type/Saira)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is available with a FAQ at: https://scripts.sil.org/OFL
+
+The files are the Latin subsets Google Fonts serves.
+
+Rajdhani (rajdhani-700.woff2) sets the headings.
+
+Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is available with a FAQ at: https://scripts.sil.org/OFL
+
+The files are the Latin and Latin Extended subsets Google Fonts serves (Bold 700).
+
+JetBrains Mono (jetbrains-mono.woff2) sets the footer figures.
+
+Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is available with a FAQ at: https://scripts.sil.org/OFL
+
+The file is the Latin subset of the variable font Google Fonts serves (weights 100-800).

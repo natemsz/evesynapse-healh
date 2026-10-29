@@ -1,0 +1,250 @@
+/* EveSynapse status. Tokens and faces follow the site's own
+   (style.css in the app): the ember palette, Saira Semi Condensed
+   for text, Rajdhani for headings, JetBrains Mono for figures.
+   State colors are the site's ESI pill: green, amber, red. */
+
+@font-face {
+  font-family: "Saira Semi Condensed";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/saira-sc-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Saira Semi Condensed";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/saira-sc-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Rajdhani";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/rajdhani-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("fonts/jetbrains-mono.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0d0503;
+  --bg-glow: rgba(255, 106, 26, 0.14);
+  --text: #faf3e6;
+  --text-bright: #fff6e6;
+  --muted: #b39a7d;
+  --accent: #ff6a1a;
+  --panel: rgba(26, 18, 11, 0.82);
+  --edge: rgba(255, 106, 26, 0.18);
+  --row: rgba(16, 13, 10, 0.55);
+  --ok: #10b981;
+  --ok-text: #6ee7b7;
+  --warn: #ffb84d;
+  --warn-text: #ffd27a;
+  --bad: #ef4444;
+  --bad-text: #fca5a5;
+  --bad-bg: rgba(60, 10, 6, 0.6);
+  --unknown: #6b6b6b;
+  --wordmark-eve: #ffffff;
+  --r: 0.5rem;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #f6f1e7;
+    --bg-glow: rgba(176, 73, 10, 0.1);
+    --text: #2a241d;
+    --text-bright: #20180e;
+    --muted: #6e5a42;
+    --accent: #b0490a;
+    --panel: #fdfbf6;
+    --edge: #d3c7ae;
+    --row: #f8f4ec;
+    --ok: #0f8a62;
+    --ok-text: #0b6b4c;
+    --warn: #b97a12;
+    --warn-text: #8a5a08;
+    --bad: #c62f10;
+    --bad-text: #9c240b;
+    --bad-bg: #fbe9e3;
+    --unknown: #9a8f80;
+    --wordmark-eve: var(--text-bright);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% -10%, var(--bg-glow), transparent 60%) no-repeat, var(--bg);
+  color: var(--text);
+  font-family: "Saira Semi Condensed", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.25rem 16px 2rem;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+/* The site's top bar wordmark: the logo mark, a hairline, then the
+   outlined letters, EVE solid and SYNAPSE stepping gold to ember. */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.35rem;
+  text-decoration: none;
+}
+.wordmark-glyph { display: block; height: 1.75rem; width: auto; margin-right: 0.75rem; flex-shrink: 0; }
+.wordmark > span { position: relative; padding-left: 0.75rem; }
+.wordmark > span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1px;
+  height: 2.25rem;
+  transform: translateY(-50%);
+  background: rgba(255, 106, 26, 0.25);
+}
+.wordmark-svg { display: block; height: 1.2em; width: auto; }
+.wordmark-svg .p-eve { fill: var(--wordmark-eve); }
+.wordmark-svg .p-s1 { fill: #ffc36c; }
+.wordmark-svg .p-s2 { fill: #ffa551; }
+.wordmark-svg .p-s3 { fill: #ff8835; }
+.wordmark-svg .p-s4 { fill: #ff6a1a; }
+.wordmark-svg .p-s5 { fill: #f35d18; }
+.wordmark-svg .p-s6 { fill: #e85017; }
+.wordmark-svg .p-s7 { fill: #dc4315; }
+.wordmark:hover .wordmark-svg .p-syn { fill: var(--text-bright); }
+.top-label {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+h1, h2 {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-bright);
+}
+h1 { font-size: 1.6rem; line-height: 1.15; }
+h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.banner, .panel {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--r);
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.banner p { margin: 0.3rem 0 0; color: var(--muted); }
+.banner-dot {
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-top: 0.5rem;
+  border-radius: 50%;
+  background: var(--unknown);
+}
+.banner[data-state="ok"] .banner-dot { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.banner[data-state="degraded"] { border-color: var(--warn); }
+.banner[data-state="degraded"] .banner-dot { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+.banner[data-state="down"] { border-color: var(--bad); background: var(--bad-bg); }
+.banner[data-state="down"] .banner-dot { background: var(--bad); box-shadow: 0 0 8px var(--bad); }
+.banner[data-state="down"] h1 { color: var(--bad-text); }
+
+.panel { padding: 1rem 1.2rem; margin-bottom: 1rem; }
+
+.services { list-style: none; margin: 0; padding: 0; }
+.service {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "dot name state" ". age age";
+  align-items: center;
+  column-gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--row);
+  border-radius: 0.35rem;
+}
+.service + .service { margin-top: 0.35rem; }
+.service .dot { grid-area: dot; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--unknown); }
+.service .name { grid-area: name; color: var(--text-bright); font-weight: 600; }
+.service .state { grid-area: state; font-weight: 600; color: var(--muted); }
+.service .age { grid-area: age; color: var(--muted); font-size: 0.85rem; }
+.service .age:empty { display: none; }
+@media (min-width: 30rem) {
+  .service { grid-template-columns: auto 1fr auto auto; grid-template-areas: "dot name age state"; }
+  .service .age { text-align: right; }
+  .service .state { min-width: 5.5rem; text-align: right; }
+}
+.service[data-state="ok"] .dot { background: var(--ok); }
+.service[data-state="ok"] .state { color: var(--ok-text); }
+.service[data-state="degraded"] .dot { background: var(--warn); }
+.service[data-state="degraded"] .state { color: var(--warn-text); }
+.service[data-state="down"] .dot { background: var(--bad); }
+.service[data-state="down"] .state { color: var(--bad-text); }
+
+.history {
+  display: flex;
+  gap: 2px;
+  height: 1.75rem;
+  align-items: stretch;
+}
+.tick {
+  flex: 1 1 0;
+  min-width: 2px;
+  max-width: 0.6rem;
+  border-radius: 2px;
+  background: var(--unknown);
+}
+.tick[data-state="ok"] { background: var(--ok); }
+.tick[data-state="degraded"] { background: var(--warn); }
+.tick[data-state="down"], .tick[data-state="unreachable"] { background: var(--bad); }
+.history-note { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.85rem; }
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.noscript { text-align: center; color: var(--muted); }
