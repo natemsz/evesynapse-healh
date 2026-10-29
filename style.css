@@ -51,6 +51,7 @@
   --bad-text: #fca5a5;
   --bad-bg: rgba(60, 10, 6, 0.6);
   --unknown: #6b6b6b;
+  --note: #38bdf8;
   --wordmark-eve: #ffffff;
   --r: 0.5rem;
 }
@@ -173,6 +174,7 @@ h2 {
   margin-bottom: 1rem;
 }
 .banner p { margin: 0.3rem 0 0; color: var(--muted); }
+.banner p a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .banner-dot {
   flex: none;
   width: 0.85rem;
@@ -187,6 +189,38 @@ h2 {
 .banner[data-state="down"] { border-color: var(--bad); background: var(--bad-bg); }
 .banner[data-state="down"] .banner-dot { background: var(--bad); box-shadow: 0 0 8px var(--bad); }
 .banner[data-state="down"] h1 { color: var(--bad-text); }
+
+/* The info notice mirrors the main site's global info banner: a
+   flat blue tinted strip, its color carried by the left edge and
+   the tag. It carries the maintenance word while the site is
+   unreachable, and the all-clear once it answers again. */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.8rem;
+  margin-bottom: 1rem;
+  background: color-mix(in srgb, var(--note) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--note) 45%, transparent);
+  border-left: 3px solid var(--note);
+  border-radius: var(--r);
+  color: var(--text-bright);
+}
+.notice[hidden] { display: none; }
+.notice-tag {
+  flex: none;
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--note);
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  padding: 0.05rem 0.4rem;
+  line-height: 1.3;
+}
+.notice-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 
 .panel { padding: 1rem 1.2rem; margin-bottom: 1rem; }
 

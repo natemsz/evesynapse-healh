@@ -12,6 +12,13 @@
   var STALE_MS = 5 * 60 * 1000;
   var HISTORY_KEY = "evesynapse-status-history";
   var HISTORY_MAX = 60;
+  // The daily maintenance window, minutes into the UTC day: the
+  // servers patch and reboot inside it, so a main site that is
+  // unreachable then is in the planned window, not an incident.
+  var MAINT_START = 11 * 60;
+  var MAINT_END = 12 * 60;
+  // The Discord invite the site itself publishes.
+  var DISCORD_URL = "https://discord.gg/76jpPP6Whb";
 
   var LABELS = {
     database: "Database",
@@ -58,6 +65,7 @@
   var lastAttempt = 0;
   var timer = 0;
   var history = [];
+  var mainWasDown = false;
 
   function $(id) { return document.getElementById(id); }
 
@@ -86,7 +94,22 @@
   function setBanner(state, title, detail) {
     $("banner").setAttribute("data-state", state);
     $("banner-title").textContent = title;
-    $("banner-detail").textContent = detail;
+    if (detail != null) $("banner-detail").textContent = detail;
+  }
+
+  // setBannerDetail fills the banner's detail line from parts:
+  // plain strings, and {text, href} for a link.
+  function setBannerDetail(parts) {
+    var d = $("banner-detail");
+    d.textContent = "";
+    parts.forEach(function (p) {
+      if (typeof p === "string") { d.appendChild(document.createTextNode(p)); return; }
+      var a = el("a", "", p.text);
+      a.href = p.href;
+      a.target = "_blank";
+      a.rel = "noreferrer";
+      d.appendChild(a);
+    });
   }
 
   function row(name, state, note) {
@@ -181,7 +204,60 @@
     return { data: { state: RANK[data.state] != null ? data.state : "degraded", rows: rows } };
   }
 
+  function inMaintWindow(now) {
+    var d = new Date(now);
+    var m = d.getUTCHours() * 60 + d.getUTCMinutes();
+    return m >= MAINT_START && m < MAINT_END;
+  }
+
+  function setNotice(text) {
+    if (!text) { $("notice").hidden = true; return; }
+    $("notice-text").textContent = text;
+    $("notice").hidden = false;
+  }
+
+  // The notice carries the word about the main site (the first
+  // summary source): the maintenance notice while it is
+  // unreachable, the all-clear once it answers again after having
+  // been down, and nothing otherwise.
+  function renderNotice(states, now) {
+    var main = -1;
+    for (var i = 0; i < sources.length; i++) {
+      if (sources[i].kind === "summary") { main = i; break; }
+    }
+    if (main < 0) { setNotice(null); return; }
+    if (states[main] === "unreachable") {
+      mainWasDown = true;
+      if (inMaintWindow(now)) {
+        setNotice("EveSynapse is down for daily security patching and system and service maintenance. The daily window runs 11:00 to 12:00 UTC. This page checks every minute and will show when the site is back up.");
+      } else {
+        setNotice("EveSynapse is not answering. This page checks every minute and will show when the site is back up.");
+      }
+    } else if (mainWasDown) {
+      mainWasDown = false;
+      setNotice("EveSynapse is back up.");
+    } else {
+      setNotice(null);
+    }
+  }
+
   function renderBanner(states) {
+    var main = -1;
+    for (var i = 0; i < sources.length; i++) {
+      if (sources[i].kind === "summary") { main = i; break; }
+    }
+    // The two poles are the main site's own states, in the site's
+    // words. Anything between them keeps the per-service account.
+    if (main >= 0 && states[main] === "unreachable") {
+      setBanner("down", "EveSynapse is unavailable", null);
+      setBannerDetail(["Service is unreachable, please watch this page or check ",
+        { text: "our discord", href: DISCORD_URL }, " for more updates."]);
+      return;
+    }
+    if (states.length && states.every(function (s) { return s === "ok"; })) {
+      setBanner("ok", "EveSynapse is working", "Service is fully functional.");
+      return;
+    }
     var unreachable = [], down = [], degraded = [];
     sources.forEach(function (src, i) {
       if (states[i] === "unreachable") unreachable.push(src.name);
@@ -280,6 +356,7 @@
       $("last-check").textContent = "Last check " + clock(new Date(now)) + ".";
       var states = sources.map(function (src, i) { return renderSource(src, results[i], now); });
       renderBanner(states);
+      renderNotice(states, now);
       addHistory(states.reduce(function (a, b) { return RANK[b] > RANK[a] ? b : a; }, "ok"), now);
     });
   }
